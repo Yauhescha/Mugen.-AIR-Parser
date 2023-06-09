@@ -23,6 +23,10 @@ public class AirReader {
         List<Clsn> clsn1List = new ArrayList<>();
         List<Clsn> clsn2List = new ArrayList<>();
         int spriteX, spriteY, offsetX, offsetY, time;
+        String flip;
+        String colorChanging;
+        Double xScale, yScale;
+        Integer rotateAngle;
         boolean isFilled;
     }
 
@@ -91,6 +95,23 @@ public class AirReader {
                 actionItem.setOffsetX(Integer.parseInt(parts[2].trim()));
                 actionItem.setOffsetY(Integer.parseInt(parts[3].trim()));
                 actionItem.setTime(Integer.parseInt(parts[4].trim()));
+
+                if(parts.length>=6){
+                    actionItem.setFlip(parts[5]);
+                }
+                if(parts.length>=7){
+                    actionItem.setColorChanging(parts[6]);
+                }
+                if(parts.length>=8){
+                    actionItem.setXScale(Double.parseDouble(parts[7]));
+                }
+                if(parts.length>=9){
+                    actionItem.setYScale(Double.parseDouble(parts[8]));
+                }
+                if(parts.length>=10){
+                    actionItem.setRotateAngle(Integer.parseInt(parts[9]));
+                }
+
                 actionItem.isFilled = true;
             }
         }
