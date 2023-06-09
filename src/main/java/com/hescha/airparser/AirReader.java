@@ -20,15 +20,17 @@ public class AirReader {
 
     @Data
     class ActionItem {
-        List<Clsn2> clsn2List = new ArrayList<>();
+        List<Clsn> clsn1List = new ArrayList<>();
+        List<Clsn> clsn2List = new ArrayList<>();
         int spriteX, spriteY, offsetX, offsetY, time;
+        boolean isFilled;
     }
 
     @Data
-    class Clsn2 {
+    class Clsn {
         int x1, y1, x2, y2;
 
-        public Clsn2(int x1, int y1, int x2, int y2) {
+        public Clsn(int x1, int y1, int x2, int y2) {
             this.x1 = x1;
             this.y1 = y1;
             this.x2 = x2;
@@ -47,35 +49,49 @@ public class AirReader {
         Action action = null;
         List<Action> actions = new ArrayList<>();
         ActionItem actionItem = null;
+        int rows = 0;
         while ((line = reader.readLine()) != null) {
+            rows++;
+            System.out.println("rows: " + rows+ " " + line);
             if (line.isEmpty() || line.startsWith(";")) {
                 continue;
             } else if (line.startsWith("[Begin Action")) {
                 action = new Action();
                 action.setActionNumber(Integer.parseInt(line.substring(14, line.length() - 1)));
                 actions.add(action);
-            } else if (line.startsWith("Clsn2: ")) {
+                System.out.println("action number: " + action.actionNumber);
+            } else if (line.startsWith("Clsn2: ") || line.startsWith("Clsn2Default: ") || line.startsWith("Clsn1: ")) {
+                boolean isClsn2 = line.startsWith("Clsn2: ");
                 actionItem = new ActionItem();
                 action.getActionItems().add(actionItem);
-                int count = Integer.parseInt(line.substring(7));
+                int beginIndex = line.startsWith("Clsn2Default: ") ? 14 : 7;
+                int count = Integer.parseInt(line.substring(beginIndex));
                 for (int i = 0; i < count; i++) {
                     line = reader.readLine();
-                    String[] parts = line.substring(13).split(",");
-                    Clsn2 clsn2 = new Clsn2(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()),
+                    String[] parts = line.substring(line.indexOf('=')+1).split(",");
+                    Clsn clsn = new Clsn(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()),
                             Integer.parseInt(parts[2].trim()), Integer.parseInt(parts[3].trim()));
-                    actionItem.getClsn2List().add(clsn2);
+                    if (isClsn2) {
+                        actionItem.getClsn2List().add(clsn);
+                    } else {
+                        actionItem.getClsn1List().add(clsn);
+                    }
                 }
-            } else if(line.startsWith("Loopstart")){
-                action.hasLoop=true;
-                action.loopStartIndex = action.getActionItems().size()-1;
-            }
-            else  {
+            } else if (line.startsWith("Loopstart")) {
+                action.hasLoop = true;
+                action.loopStartIndex = action.getActionItems().size() - 1;
+            } else {
+                if(actionItem.isFilled){
+                    actionItem = new ActionItem();
+                    action.getActionItems().add(actionItem);
+                }
                 String[] parts = line.split(",");
                 actionItem.setSpriteX(Integer.parseInt(parts[0].trim()));
                 actionItem.setSpriteY(Integer.parseInt(parts[1].trim()));
                 actionItem.setOffsetX(Integer.parseInt(parts[2].trim()));
                 actionItem.setOffsetY(Integer.parseInt(parts[3].trim()));
                 actionItem.setTime(Integer.parseInt(parts[4].trim()));
+                actionItem.isFilled = true;
             }
         }
 
