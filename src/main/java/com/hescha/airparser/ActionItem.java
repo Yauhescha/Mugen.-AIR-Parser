@@ -8,12 +8,16 @@ import java.util.List;
 
 @Data
 public class ActionItem {
-    List<Clsn> clsn1List = new ArrayList<>();
-    List<Clsn> clsn2List = new ArrayList<>();
-    int spriteX, spriteY, offsetX, offsetY, time;
-    String flip;
-    String colorChanging;
-    Double xScale, yScale;
-    Integer rotateAngle;
-    boolean isFilled;
+    private List<Clsn> clsn1List = new ArrayList<>();
+    private List<Clsn> clsn2List = new ArrayList<>();
+    private int spriteX;
+    private int spriteY;
+    private int offsetX;
+    private int offsetY;
+    private int time;
+    private String flip;
+    private String colorChanging;
+    private Double xScale, yScale;
+    private Integer rotateAngle;
+    private boolean isFilled;
 }

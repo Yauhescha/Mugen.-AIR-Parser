@@ -1,52 +1,61 @@
 package com.hescha.airparser;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class AirReader {
+    private static final String COMMA = ",";
+    private static final char EQUALS = '=';
+    private static final String CLSN_2_DEFAULT = "Clsn2Default: ";
+    private static final String CLSN_2 = "Clsn2: ";
+    private static final String BEGIN_ACTION = "[Begin Action";
+    private static final String LOOPSTART = "Loopstart";
+    private static final String CLSN_1 = "Clsn1: ";
 
-    public static final String PATH_TO_FILE = "D:\\ProgramFiles\\Java\\idea-workspace\\AirParser\\AirParser\\src\\main\\resources\\test.txt";
+    // Example
+//    public static void main(String[] args) throws IOException {
+//        AirReader reader = new AirReader();
+//        reader.read("src/main/resources/test.air");
+//    }
 
-    public static void main(String[] args) throws IOException {
-        read();
+    public List<Action> read(String pathToFile) throws IOException {
+        return read(new File(pathToFile));
     }
 
-    private static void read() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(PATH_TO_FILE));
+    public List<Action> read(File file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
         String line;
         Action action = null;
         List<Action> actions = new ArrayList<>();
         ActionItem actionItem = null;
-        int rows = 0;
+
         while ((line = reader.readLine()) != null) {
-            rows++;
-            System.out.println("rows: " + rows + " " + line);
             if (line.isEmpty() || line.startsWith(";")) {
                 continue;
-            } else if (line.startsWith("[Begin Action")) {
+            } else if (line.startsWith(BEGIN_ACTION)) {
                 action = readAction(line, actions);
-            } else if (line.startsWith("Clsn2: ") || line.startsWith("Clsn2Default: ") || line.startsWith("Clsn1: ")) {
+            } else if (line.startsWith(CLSN_2) || line.startsWith(CLSN_2_DEFAULT) || line.startsWith(CLSN_1)) {
                 actionItem = readClnsAsNewActionItem(reader, line, action);
-            } else if (line.startsWith("Loopstart")) {
+            } else if (line.startsWith(LOOPSTART)) {
                 setLoopForAction(action);
             } else {
                 actionItem = fillActionItem(line, action, actionItem);
             }
         }
 
-        System.out.println(Arrays.toString(actions.toArray()));
+        return actions;
     }
 
-    private static ActionItem fillActionItem(String line, Action action, ActionItem actionItem) {
-        if (actionItem.isFilled) {
+    private ActionItem fillActionItem(String line, Action action, ActionItem actionItem) {
+        if (actionItem.isFilled()) {
             actionItem = new ActionItem();
             action.getActionItems().add(actionItem);
         }
-        String[] parts = line.split(",");
+        String[] parts = line.split(COMMA);
         actionItem.setSpriteX(Integer.parseInt(parts[0].trim()));
         actionItem.setSpriteY(Integer.parseInt(parts[1].trim()));
         actionItem.setOffsetX(Integer.parseInt(parts[2].trim()));
@@ -69,27 +78,30 @@ public class AirReader {
             actionItem.setRotateAngle(Integer.parseInt(parts[9]));
         }
 
-        actionItem.isFilled = true;
+        actionItem.setFilled(true);
         return actionItem;
     }
 
-    private static void setLoopForAction(Action action) {
-        action.hasLoop = true;
-        action.loopStartIndex = action.getActionItems().size() - 1;
+    private void setLoopForAction(Action action) {
+        action.setHasLoop(true);
+        action.setLoopStartIndex(action.getActionItems().size() - 1);
     }
 
-    private static ActionItem readClnsAsNewActionItem(BufferedReader reader, String line, Action action) throws IOException {
+    private ActionItem readClnsAsNewActionItem(BufferedReader reader, String line, Action action) throws IOException {
         ActionItem actionItem;
-        boolean isClsn2 = line.startsWith("Clsn2: ");
+        boolean isClsn2 = line.startsWith(CLSN_2);
         actionItem = new ActionItem();
         action.getActionItems().add(actionItem);
-        int beginIndex = line.startsWith("Clsn2Default: ") ? 14 : 7;
+        int beginIndex = line.startsWith(CLSN_2_DEFAULT) ? 14 : 7;
         int count = Integer.parseInt(line.substring(beginIndex));
         for (int i = 0; i < count; i++) {
             line = reader.readLine();
-            String[] parts = line.substring(line.indexOf('=') + 1).split(",");
-            Clsn clsn = new Clsn(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()),
-                    Integer.parseInt(parts[2].trim()), Integer.parseInt(parts[3].trim()));
+            String[] parts = line.substring(line.indexOf(EQUALS) + 1).split(COMMA);
+            Clsn clsn = new Clsn(
+                    Integer.parseInt(parts[0].trim()),
+                    Integer.parseInt(parts[1].trim()),
+                    Integer.parseInt(parts[2].trim()),
+                    Integer.parseInt(parts[3].trim()));
             if (isClsn2) {
                 actionItem.getClsn2List().add(clsn);
             } else {
@@ -99,12 +111,11 @@ public class AirReader {
         return actionItem;
     }
 
-    private static Action readAction(String line, List<Action> actions) {
-        Action action;
-        action = new Action();
-        action.setActionNumber(Integer.parseInt(line.substring(14, line.length() - 1)));
+    private Action readAction(String line, List<Action> actions) {
+        int actionNumber = Integer.parseInt(line.substring(14, line.length() - 1));
+        Action action = new Action();
+        action.setActionNumber(actionNumber);
         actions.add(action);
-        System.out.println("action number: " + action.actionNumber);
         return action;
     }
 }

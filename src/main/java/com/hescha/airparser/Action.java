@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 public class Action {
-    int actionNumber;
-    List<ActionItem> actionItems = new ArrayList<>();
-    boolean hasLoop;
-    int loopStartIndex;
+    private int actionNumber;
+    private List<ActionItem> actionItems = new ArrayList<>();
+    private boolean hasLoop;
+    private int loopStartIndex;
 }
