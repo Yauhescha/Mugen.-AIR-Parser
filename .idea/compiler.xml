@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Mugen. AIR parser" />
+        <module name="airparser" />
         <module name="AirParser" />
       </profile>
     </annotationProcessing>
